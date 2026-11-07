@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SoundOut</string>
+    <string name="widget_name">SoundOut</string>
+    <string name="widget_description">把常用声音放到桌面，点按即可播放</string>
+    <string name="widget_config_title">选择播放音频</string>
+    <string name="widget_config_subtitle">点按小组件时，将播放这段声音。之后可以点按小组件上的设置图标重新选择。</string>
+    <string name="widget_empty_title">还没有可播放的音频</string>
+    <string name="widget_empty_desc">先打开 SoundOut 导入音频，再回来选择。</string>
+    <string name="action_save">保存</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_back">返回</string>
+    <string name="action_open_app">打开 SoundOut</string>
+    <string name="widget_play">播放</string>
+    <string name="selected">已选择</string>
+</resources>

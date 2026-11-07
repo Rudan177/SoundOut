@@ -1,0 +1,26 @@
+name: soundout
+description: "把常用声音放到手边。"
+publish_to: 'none'
+
+version: 0.2.2+8
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/app_icon_original.png
+    - assets/images/app_icon_photo.png
+    - assets/version.json

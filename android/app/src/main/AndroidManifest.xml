@@ -1,0 +1,142 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 仅用于从 GitHub 检查版本与下载安装包，音频不会上传。 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- 国产 ROM 的桌面通常不支持 requestPinShortcut，需要旧版广播兜底。
+         仅声明，不在运行时申请，不会弹出权限对话框。 -->
+    <uses-permission android:name="android.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.android.launcher2.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.android.launcher3.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.miui.home.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.huawei.launcher.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.hihonor.launcher.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.oppo.launcher.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.bbk.launcher2.permission.INSTALL_SHORTCUT" />
+
+    <application
+        android:name="${applicationName}"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher_original"
+        android:roundIcon="@mipmap/ic_launcher_original"
+        android:allowBackup="true"
+        android:supportsRtl="true"
+        android:enableOnBackInvokedCallback="true"
+        android:theme="@style/NormalTheme">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme" />
+        </activity>
+
+        <activity-alias
+            android:name=".MainActivityOriginal"
+            android:targetActivity=".MainActivity"
+            android:exported="true"
+            android:enabled="true"
+            android:icon="@mipmap/ic_launcher_original"
+            android:roundIcon="@mipmap/ic_launcher_original"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityPhoto"
+            android:targetActivity=".MainActivity"
+            android:exported="true"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity
+            android:name=".PlaybackLaunchActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:theme="@style/Theme.SoundOut.Transparent" />
+
+        <activity
+            android:name=".WidgetConfigActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:label="@string/widget_config_title"
+            android:theme="@style/Theme.SoundOut.Widget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".PlaybackService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback"
+            android:stopWithTask="false" />
+
+        <receiver
+            android:name=".WidgetActionReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".SoundOutWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/soundout_widget_info" />
+        </receiver>
+
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="application/vnd.android.package-archive" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+</manifest>
