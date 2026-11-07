@@ -26,6 +26,20 @@
 6. 每次发版更新 `dist/SHA256SUMS.txt`，并创建 GitHub Release，上传 APK 与校验文件。
 7. `assets/version.json` 必须与 `pubspec.yaml` 的版本、`versionName` 保持一致；应用内更新检测以该文件的 `versionCode` 与 `versionName` 为准。
 
+### 1.1 版本递增触发规则
+
+1. 用户说「做一个新功能」时：
+   - 只把构建号 `BS` 后面的数字加 1，例如 `0.2.3:01-BS10` → `0.2.3:01-BS11`。
+   - `x.x.x` 语义化版本保持不变。
+   - 同步更新所有版本显示位置与 `assets/version.json`。
+   - 用户未要求打包时，不构建、不发布。
+2. 用户说「打包」时：
+   - 把 `x.x.x` 的最后一位加 1，例如 `0.2.3` → `0.2.4`。
+   - `versionCode` 同步加 1。
+   - 构建 APK、生成 `SHA256SUMS.txt`、提交并推送到 GitHub，同时创建对应 Release 并上传 APK 与校验文件。
+3. 用户明确指定版本号时，严格使用用户指定的值，不自动递增。
+4. 同一次需求同时包含新功能与打包时，先按第 1 条递增 `BS`，再按第 2 条递增 `x.x.x` 并打包发布。
+
 ## 2. Flutter 代码规范
 
 1. 使用 `dart format` 保持格式统一。
