@@ -2,7 +2,7 @@
 
 本文档规定 SoundOut 的版本、界面、Flutter、原生 Android、数据、权限、构建与验收标准。后续修改默认按本文执行。
 
-- 当前版本：`0.2.2:01-BS09`
+- 当前版本：`0.2.3:01-BS10`
 - 应用 ID：`com.rudan.soundout`
 - 最低 Android：API 24
 - 目标 Android：API 36

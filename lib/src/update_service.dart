@@ -129,10 +129,10 @@ class UpdateService {
       );
     } catch (_) {
       return VersionInfo.fromJson(const <String, dynamic>{
-        'version': '0.2.2',
-        'build': '01-BS09',
-        'versionName': '0.2.2:01-BS09',
-        'versionCode': 8,
+        'version': '0.2.3',
+        'build': '01-BS10',
+        'versionName': '0.2.3:01-BS10',
+        'versionCode': 10,
         'repository': 'Rudan177/SoundOut',
         'changelog': <String>[],
       });

@@ -6,7 +6,7 @@ SoundOut 是一个 Flutter + 原生 Android 的轻量音频快捷播放器，界
 
 后续修改请遵循 [开发标准](./DEVELOPMENT.md)。
 
-- 版本：`0.2.2:01-BS09`
+- 版本：`0.2.3:01-BS10`
 - 开发者：**ByRUDAN**
 - 应用 ID：`com.rudan.soundout`
 
@@ -99,9 +99,9 @@ flutter build apk --release --split-per-abi
 
 | 文件 | 适用设备 | 大小 |
 | --- | --- | --- |
-| `SoundOut-0.2.2-01-BS09-arm64-v8a.apk` | 大多数现代 Android 手机（推荐） | 约 19 MB |
-| `SoundOut-0.2.2-01-BS09-armeabi-v7a.apk` | 较旧的 32 位设备 | 约 16 MB |
-| `SoundOut-0.2.2-01-BS09-universal.apk` | 所有 ABI，含模拟器 | 约 50 MB |
+| `SoundOut-0.2.3-01-BS10-arm64-v8a.apk` | 大多数现代 Android 手机（推荐） | 约 19 MB |
+| `SoundOut-0.2.3-01-BS10-armeabi-v7a.apk` | 较旧的 32 位设备 | 约 16 MB |
+| `SoundOut-0.2.3-01-BS10-universal.apk` | 所有 ABI，含模拟器 | 约 50 MB |
 
 下载入口就是上方的 Releases 页面，校验值随 Release 一并提供（`SHA256SUMS.txt`）。
 
