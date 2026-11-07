@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../app_model.dart';
+import '../glass.dart';
+import '../haptics.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/desktop_entry_sheet.dart';
 import '../widgets/ui_helpers.dart';
@@ -89,7 +91,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ),
                   const Spacer(),
                   TextButton(
-                    onPressed: _busy ? null : _finish,
+                    onPressed: _busy
+                        ? null
+                        : () {
+                            AppHaptics.tap();
+                            _finish();
+                          },
                     child: const Text('跳过'),
                   ),
                 ],
@@ -138,11 +145,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     child: FilledButton(
                       onPressed: _busy
                           ? null
-                          : _page == 0
-                          ? _next
-                          : hasAudio
-                          ? _finish
-                          : _import,
+                          : () {
+                              AppHaptics.tap();
+                              if (_page == 0) {
+                                _next();
+                              } else if (hasAudio) {
+                                _finish();
+                              } else {
+                                _import();
+                              }
+                            },
                       child: _busy
                           ? SizedBox.square(
                               dimension: 20,
@@ -181,12 +193,22 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       children: [
                         if (hasAudio)
                           TextButton(
-                            onPressed: _busy ? null : _import,
+                            onPressed: _busy
+                                ? null
+                                : () {
+                                    AppHaptics.tap();
+                                    _import();
+                                  },
                             child: const Text('再添加一些'),
                           ),
                         if (!hasAudio)
                           TextButton(
-                            onPressed: _busy ? null : _finish,
+                            onPressed: _busy
+                                ? null
+                                : () {
+                                    AppHaptics.tap();
+                                    _finish();
+                                  },
                             child: const Text('稍后再说'),
                           ),
                       ],
@@ -327,12 +349,16 @@ class _ImportStep extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 24),
-          Material(
-            color: scheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(20),
-            clipBehavior: Clip.antiAlias,
+          GlassPanel(
+            radius: 20,
+            opaqueColor: scheme.surfaceContainerLow,
             child: InkWell(
-              onTap: busy ? null : onImport,
+              onTap: busy
+                  ? null
+                  : () {
+                      AppHaptics.tap();
+                      onImport();
+                    },
               child: Padding(
                 padding: const EdgeInsets.all(18),
                 child: Row(

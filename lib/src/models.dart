@@ -51,6 +51,9 @@ class AppSettings {
     this.customIconPath,
     this.onboardingDone = false,
     this.shortcutPromptShown = false,
+    this.glassEffect = false,
+    this.glassStrength = 0.5,
+    this.hapticsEnabled = false,
   });
 
   final String? defaultAudioId;
@@ -63,6 +66,9 @@ class AppSettings {
   final String? customIconPath;
   final bool onboardingDone;
   final bool shortcutPromptShown;
+  final bool glassEffect;
+  final double glassStrength;
+  final bool hapticsEnabled;
 
   bool get isInfinite => playCount <= 0;
 
@@ -85,6 +91,12 @@ class AppSettings {
 
   String get triggerModeLabel => triggerMode == 'open_app' ? '打开应用后播放' : '直接播放';
 
+  String get glassStrengthLabel {
+    if (glassStrength >= 0.75) return '强';
+    if (glassStrength >= 0.25) return '中';
+    return '弱';
+  }
+
   factory AppSettings.fromMap(Map<dynamic, dynamic>? map) {
     if (map == null) return const AppSettings();
     final rawVolume = (map['volume'] as num?)?.toDouble() ?? 1;
@@ -103,6 +115,11 @@ class AppSettings {
       customIconPath: map['customIconPath'] as String?,
       onboardingDone: map['onboardingDone'] as bool? ?? false,
       shortcutPromptShown: map['shortcutPromptShown'] as bool? ?? false,
+      glassEffect: map['glassEffect'] as bool? ?? false,
+      glassStrength: ((map['glassStrength'] as num?)?.toDouble() ?? 0.5)
+          .clamp(0, 1)
+          .toDouble(),
+      hapticsEnabled: map['hapticsEnabled'] as bool? ?? false,
     );
   }
 }

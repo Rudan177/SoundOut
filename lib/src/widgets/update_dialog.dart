@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../haptics.dart';
 import '../update_service.dart';
 import 'ui_helpers.dart';
 
@@ -34,6 +35,7 @@ Future<void> handleInstallResult(
             : SnackBarAction(
                 label: '重试',
                 onPressed: () async {
+                  AppHaptics.tap();
                   final retry = await service.installApk(path);
                   if (!context.mounted) return;
                   await handleInstallResult(context, service, retry);
@@ -126,17 +128,26 @@ class _UpdateAvailableDialog extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            AppHaptics.tap();
+            Navigator.of(context).pop();
+          },
           child: const Text('取消'),
         ),
         if (update.apkUrl != null)
           FilledButton(
-            onPressed: () => Navigator.of(context).pop('download'),
+            onPressed: () {
+              AppHaptics.tap();
+              Navigator.of(context).pop('download');
+            },
             child: const Text('更新'),
           )
         else
           FilledButton(
-            onPressed: () => Navigator.of(context).pop('release'),
+            onPressed: () {
+              AppHaptics.tap();
+              Navigator.of(context).pop('release');
+            },
             child: const Text('前往下载'),
           ),
       ],

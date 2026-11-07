@@ -58,8 +58,16 @@ class NativeBridge {
     await _methodChannel.invokeMethod<void>('stop');
   }
 
+  Future<void> seekPlayback(int positionMs) async {
+    await _methodChannel.invokeMethod<void>('seekPlayback', {
+      'positionMs': positionMs,
+    });
+  }
+
   Future<Map<String, dynamic>> requestPinWidget() async {
-    return _asMap(await _methodChannel.invokeMethod<dynamic>('requestPinWidget'));
+    return _asMap(
+      await _methodChannel.invokeMethod<dynamic>('requestPinWidget'),
+    );
   }
 
   Future<Map<String, dynamic>> getDesktopCapabilities() async {

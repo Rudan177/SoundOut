@@ -2,7 +2,7 @@ name: soundout
 description: "把常用声音放到手边。"
 publish_to: 'none'
 
-version: 0.2.3+10
+version: 0.3.0+16
 
 environment:
   sdk: ^3.13.0

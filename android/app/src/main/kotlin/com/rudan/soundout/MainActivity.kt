@@ -121,6 +121,13 @@ class MainActivity : FlutterActivity() {
                 sendPlaybackCommand(PlaybackService.ACTION_RESUME)
                 result.success(true)
             }
+            "seekPlayback" -> {
+                sendPlaybackCommand(
+                    PlaybackService.ACTION_SEEK,
+                    call.argument<Int>("positionMs")?.toLong() ?: 0L,
+                )
+                result.success(true)
+            }
             "stop" -> {
                 stopPlayback()
                 result.success(true)
@@ -365,6 +372,15 @@ class MainActivity : FlutterActivity() {
         (patch["shortcutPromptShown"] as? Boolean)?.let {
             settings = settings.copy(shortcutPromptShown = it)
         }
+        (patch["glassEffect"] as? Boolean)?.let {
+            settings = settings.copy(glassEffect = it)
+        }
+        (patch["glassStrength"] as? Number)?.let {
+            settings = settings.copy(glassStrength = it.toFloat().coerceIn(0f, 1f))
+        }
+        (patch["hapticsEnabled"] as? Boolean)?.let {
+            settings = settings.copy(hapticsEnabled = it)
+        }
 
         settings = NativeStore.ensureDefault(this, library, settings)
         NativeStore.saveSettings(this, settings)
@@ -410,11 +426,13 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun sendPlaybackCommand(action: String) {
+    private fun sendPlaybackCommand(action: String, positionMs: Long? = null) {
         runCatching {
-            startService(
-                Intent(this, PlaybackService::class.java).setAction(action),
-            )
+            val intent = Intent(this, PlaybackService::class.java).setAction(action)
+            if (positionMs != null) {
+                intent.putExtra(PlaybackService.EXTRA_POSITION_MS, positionMs)
+            }
+            startService(intent)
         }
     }
 

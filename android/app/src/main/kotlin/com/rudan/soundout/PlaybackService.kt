@@ -29,7 +29,9 @@ class PlaybackService : Service() {
         const val ACTION_STOP = "com.rudan.soundout.action.STOP"
         const val ACTION_PAUSE = "com.rudan.soundout.action.PAUSE"
         const val ACTION_RESUME = "com.rudan.soundout.action.RESUME"
+        const val ACTION_SEEK = "com.rudan.soundout.action.SEEK"
         const val EXTRA_AUDIO_ID = "audio_id"
+        const val EXTRA_POSITION_MS = "position_ms"
 
         private const val CHANNEL_ID = "soundout_playback_v2"
         private const val LEGACY_CHANNEL_ID = "soundout_playback"
@@ -202,6 +204,7 @@ class PlaybackService : Service() {
             ACTION_STOP -> finishPlayback()
             ACTION_PAUSE -> pausePlayback()
             ACTION_RESUME -> resumePlayback()
+            ACTION_SEEK -> seekTo(intent.getLongExtra(EXTRA_POSITION_MS, 0L))
             ACTION_PLAY -> {
                 val requestedId = intent.getStringExtra(EXTRA_AUDIO_ID)
                 play(requestedId)

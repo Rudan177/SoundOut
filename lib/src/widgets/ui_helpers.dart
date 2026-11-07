@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../haptics.dart';
+
 class HomeChromeInsets extends InheritedWidget {
   const HomeChromeInsets({
     super.key,
@@ -49,7 +51,10 @@ Future<bool> showDeleteAudioDialog(BuildContext context, String title) async {
         content: Text('「$title」将从音频库中移除，使用它的快捷方式和小组件也会同步更新。'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () {
+              AppHaptics.tap();
+              Navigator.of(context).pop(false);
+            },
             child: const Text('取消'),
           ),
           FilledButton(
@@ -57,7 +62,10 @@ Future<bool> showDeleteAudioDialog(BuildContext context, String title) async {
               backgroundColor: scheme.error,
               foregroundColor: scheme.onError,
             ),
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () {
+              AppHaptics.tap();
+              Navigator.of(context).pop(true);
+            },
             child: const Text('删除'),
           ),
         ],

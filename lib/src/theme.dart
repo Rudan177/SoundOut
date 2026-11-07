@@ -20,7 +20,7 @@ SystemUiOverlayStyle systemOverlayStyleFor(Brightness brightness) {
       );
 }
 
-ThemeData buildAppTheme(Brightness brightness) {
+ThemeData buildAppTheme(Brightness brightness, {bool glass = false}) {
   final isDark = brightness == Brightness.dark;
   final seed = ColorScheme.fromSeed(
     seedColor: brandGreen,
@@ -99,10 +99,10 @@ ThemeData buildAppTheme(Brightness brightness) {
 
   return base.copyWith(
     textTheme: textTheme,
-    scaffoldBackgroundColor: scheme.surface,
-    canvasColor: scheme.surface,
+    scaffoldBackgroundColor: glass ? Colors.transparent : scheme.surface,
+    canvasColor: glass ? Colors.transparent : scheme.surface,
     appBarTheme: AppBarTheme(
-      backgroundColor: scheme.surface,
+      backgroundColor: glass ? Colors.transparent : scheme.surface,
       surfaceTintColor: Colors.transparent,
       foregroundColor: scheme.onSurface,
       elevation: 0,

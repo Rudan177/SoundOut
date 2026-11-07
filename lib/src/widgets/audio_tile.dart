@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../haptics.dart';
 import '../models.dart';
 import 'app_popup_menu.dart';
 import 'audio_cover.dart';
@@ -80,7 +81,10 @@ class AudioTile extends StatelessWidget {
             )
           : Colors.transparent,
       child: InkWell(
-        onTap: onPlay,
+        onTap: () {
+          AppHaptics.tap();
+          onPlay();
+        },
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
           child: Row(
@@ -126,7 +130,10 @@ class AudioTile extends StatelessWidget {
                 ),
               ),
               IconButton(
-                onPressed: onPlay,
+                onPressed: () {
+                  AppHaptics.tap();
+                  onPlay();
+                },
                 tooltip: isPlaying
                     ? '暂停'
                     : (active ? '继续' : '播放'),
@@ -149,7 +156,10 @@ class AudioTile extends StatelessWidget {
               ),
               IconButton(
                 key: _menuKey,
-                onPressed: () => _openMenu(context),
+                onPressed: () {
+                  AppHaptics.tap();
+                  _openMenu(context);
+                },
                 tooltip: '更多',
                 style: IconButton.styleFrom(
                   minimumSize: const Size.square(40),

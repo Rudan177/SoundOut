@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app_model.dart';
+import '../haptics.dart';
 import '../models.dart';
 import 'app_sheet.dart';
 import 'ui_helpers.dart';
@@ -49,6 +50,7 @@ Future<void> showDesktopEntrySheet(
             padding: const EdgeInsets.only(top: 4, bottom: 10),
             child: TextButton(
               onPressed: () {
+                AppHaptics.tap();
                 Navigator.of(context).pop();
                 showManualAddDialog(context);
               },
@@ -92,7 +94,10 @@ class _DesktopRow extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return InkWell(
-      onTap: onTap,
+      onTap: () {
+        AppHaptics.tap();
+        onTap();
+      },
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 56),
         child: Padding(
@@ -160,12 +165,15 @@ Future<void> pinAudioShortcut(
         method == 'legacy' ? '已请求添加桌面快捷方式' : '请在桌面确认添加快捷方式',
         action: SnackBarAction(
           label: '没出现？',
-          onPressed: () => showManualAddDialog(
-            context,
-            shortcut: true,
-            oem: oem,
-            model: model,
-          ),
+          onPressed: () {
+            AppHaptics.tap();
+            showManualAddDialog(
+              context,
+              shortcut: true,
+              oem: oem,
+              model: model,
+            );
+          },
         ),
       );
     } else {
@@ -202,12 +210,15 @@ Future<void> pinWidget(BuildContext context, AppModel model) async {
         '请在桌面确认添加小组件',
         action: SnackBarAction(
           label: '没出现？',
-          onPressed: () => showManualAddDialog(
-            context,
-            oem: oem,
-            model: model,
-            onPinShortcut: onPinShortcut,
-          ),
+          onPressed: () {
+            AppHaptics.tap();
+            showManualAddDialog(
+              context,
+              oem: oem,
+              model: model,
+              onPinShortcut: onPinShortcut,
+            );
+          },
         ),
       );
     } else {
@@ -302,6 +313,7 @@ Future<void> showManualAddDialog(
           if (canOpenSettings)
             TextButton(
               onPressed: () async {
+                AppHaptics.tap();
                 Navigator.of(context).pop();
                 await model.openDesktopPermissionSettings();
               },
@@ -310,13 +322,17 @@ Future<void> showManualAddDialog(
           if (onPinShortcut != null)
             TextButton(
               onPressed: () {
+                AppHaptics.tap();
                 Navigator.of(context).pop();
                 onPinShortcut();
               },
               child: const Text('改为添加快捷方式'),
             ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              AppHaptics.tap();
+              Navigator.of(context).pop();
+            },
             child: const Text('知道了'),
           ),
         ],

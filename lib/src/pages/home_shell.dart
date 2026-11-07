@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../app_model.dart';
+import '../haptics.dart';
+import '../models.dart';
 import '../widgets/concert_navigation_dock.dart';
 import '../widgets/desktop_entry_sheet.dart';
 import '../widgets/mini_player.dart';
+import '../widgets/player_sheet.dart';
 import '../widgets/ui_helpers.dart';
 import 'audio_page.dart';
 import 'settings_page.dart';
@@ -40,13 +42,20 @@ class _HomeShellState extends State<HomeShell> {
 
   void _selectTab(int index) {
     if (index == _index) return;
-    HapticFeedback.selectionClick();
+    AppHaptics.select();
     setState(() => _index = index);
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeOutCubic,
     );
+  }
+
+  AudioItem? _nextAudio(List<AudioItem> audios, String? currentId) {
+    if (audios.length < 2) return null;
+    final index = audios.indexWhere((audio) => audio.id == currentId);
+    if (index < 0) return audios.first;
+    return audios[(index + 1) % audios.length];
   }
 
   @override
@@ -58,6 +67,7 @@ class _HomeShellState extends State<HomeShell> {
     final pageBottom = dockInset + (playerVisible ? miniHeight + 8 : 0) + 18;
     final snackBarBottom = dockInset + (playerVisible ? miniHeight + 8 : 0) + 8;
     final audio = model.audioById(model.playback.audioId);
+    final nextAudio = _nextAudio(model.audios, model.playback.audioId);
 
     return PopScope(
       canPop: _index == 0,
@@ -121,7 +131,15 @@ class _HomeShellState extends State<HomeShell> {
                               child: MiniPlayer(
                                 snapshot: model.playback,
                                 audio: audio,
-                                onStop: () => model.stop(),
+                                onToggle: () => model.playback.playing
+                                    ? model.pausePlayback()
+                                    : model.resumePlayback(),
+                                onNext: nextAudio == null
+                                    ? null
+                                    : () => model.play(nextAudio.id),
+                                onOpen: () => model.playback.active
+                                    ? showPlayerSheet(context)
+                                    : _selectTab(0),
                               ),
                             )
                           : const SizedBox.shrink(key: ValueKey('mini-empty')),

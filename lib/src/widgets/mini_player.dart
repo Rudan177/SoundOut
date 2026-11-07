@@ -1,83 +1,76 @@
 import 'package:flutter/material.dart';
 
+import '../glass.dart';
+import '../haptics.dart';
 import '../models.dart';
+import '../tokens.dart';
 import 'audio_cover.dart';
-import 'equalizer_bars.dart';
 
+/// 贴着导航胶囊的迷你播放条：圆形玻璃胶囊、20 半径封面，
+/// 右侧播放/暂停与下一段，点按整条进入音频页。
 class MiniPlayer extends StatelessWidget {
   const MiniPlayer({
     super.key,
     required this.snapshot,
     required this.audio,
-    required this.onStop,
+    required this.onToggle,
+    required this.onNext,
+    required this.onOpen,
   });
 
   final PlaybackSnapshot snapshot;
   final AudioItem? audio;
-  final VoidCallback onStop;
+  final VoidCallback onToggle;
+  final VoidCallback? onNext;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final foreground = scheme.onInverseSurface;
-    final secondary = foreground.withValues(alpha: 0.64);
-    final position = formatDuration(snapshot.positionMs);
-    final duration = formatDuration(snapshot.durationMs);
+    final title = snapshot.title.isEmpty
+        ? (audio?.title ?? '正在播放')
+        : snapshot.title;
     final meta = snapshot.durationMs > 0
-        ? '${snapshot.repeatLabel} · $position / $duration'
+        ? '${snapshot.repeatLabel} · ${formatDuration(snapshot.positionMs)} / '
+              '${formatDuration(snapshot.durationMs)}'
         : snapshot.repeatLabel;
 
-    return Material(
-      color: scheme.inverseSurface,
-      borderRadius: BorderRadius.circular(20),
-      clipBehavior: Clip.antiAlias,
-      elevation: 2,
-      shadowColor: Colors.black.withValues(alpha: 0.25),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
+    return GlassPanel(
+      radius: AppCorner.full,
+      shadows: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.2),
+          blurRadius: 16,
+          offset: const Offset(0, 6),
+        ),
+      ],
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: () {
+            AppHaptics.tap();
+            onOpen();
+          },
+          customBorder: AppShape.full,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 4, 8),
+            child: Row(
               children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    AudioCover(audio: audio, size: 40, radius: 12),
-                    if (snapshot.playing)
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: scheme.inverseSurface.withValues(alpha: 0.66),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: SizedBox.square(
-                          dimension: 40,
-                          child: Center(
-                            child: EqualizerBars(
-                              color: scheme.inversePrimary,
-                              size: 16,
-                              active: true,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(width: 12),
+                AudioCover(audio: audio, size: 40, radius: 20),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        snapshot.title.isEmpty
-                            ? (audio?.title ?? '正在播放')
-                            : snapshot.title,
+                        title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: foreground,
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
+                          height: 1.25,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -86,37 +79,44 @@ class MiniPlayer extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: secondary,
+                          color: scheme.onSurfaceVariant,
+                          fontSize: 11,
+                          height: 1.3,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
                 IconButton(
-                  onPressed: onStop,
-                  tooltip: '停止播放',
-                  style: IconButton.styleFrom(
-                    backgroundColor: foreground.withValues(alpha: 0.1),
-                    foregroundColor: foreground,
-                    minimumSize: const Size.square(36),
-                    padding: EdgeInsets.zero,
+                  tooltip: snapshot.playing ? '暂停' : '播放',
+                  onPressed: () {
+                    AppHaptics.tap();
+                    onToggle();
+                  },
+                  iconSize: 26,
+                  color: scheme.onSurface,
+                  icon: Icon(
+                    snapshot.playing
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded,
                   ),
-                  icon: const Icon(Icons.stop_rounded, size: 20),
+                ),
+                IconButton(
+                  tooltip: '下一段',
+                  onPressed: onNext == null
+                      ? null
+                      : () {
+                          AppHaptics.tap();
+                          onNext!();
+                        },
+                  iconSize: 24,
+                  color: scheme.onSurface,
+                  disabledColor: scheme.onSurface.opacity38,
+                  icon: const Icon(Icons.skip_next_rounded),
                 ),
               ],
             ),
-            const SizedBox(height: 9),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(2),
-              child: LinearProgressIndicator(
-                value: snapshot.progress,
-                minHeight: 2,
-                color: scheme.inversePrimary,
-                backgroundColor: foreground.withValues(alpha: 0.14),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

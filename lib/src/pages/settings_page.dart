@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../app_model.dart';
+import '../haptics.dart';
 import '../models.dart';
 import '../widgets/app_icon.dart';
+import '../widgets/app_popup_menu.dart';
 import '../widgets/app_sheet.dart';
-import '../widgets/option_sheet.dart';
 import '../widgets/page_heading.dart';
 import '../widgets/settings_widgets.dart';
 import '../widgets/desktop_entry_sheet.dart';
@@ -21,81 +22,7 @@ class SettingsPage extends StatelessWidget {
   final double bottomPadding;
   final VoidCallback onOpenAudioTab;
 
-  Future<void> _pickDefaultAudio(BuildContext context) async {
-    final model = AppScope.read(context);
-    if (model.audios.isEmpty) {
-      onOpenAudioTab();
-      return;
-    }
-    final selected = await showAudioPickerSheet(
-      context: context,
-      audios: model.audios,
-      selectedId: model.defaultAudio?.id,
-    );
-    if (selected == null || !context.mounted) return;
-    try {
-      await AppScope.read(context).updateSettings({'defaultAudioId': selected});
-    } catch (_) {
-      if (context.mounted) showAppSnackBar(context, '保存失败，请重试');
-    }
-  }
-
-  Future<void> _pickPlayCount(
-    BuildContext context,
-    AppSettings settings,
-  ) async {
-    final value = await showOptionsSheet<int>(
-      context: context,
-      title: '重复次数',
-      selected: settings.playCount,
-      options: const [
-        OptionChoice(1, '1 次'),
-        OptionChoice(2, '2 次'),
-        OptionChoice(3, '3 次'),
-        OptionChoice(5, '5 次'),
-        OptionChoice(10, '10 次'),
-        OptionChoice(0, '循环播放'),
-      ],
-    );
-    if (value == null || !context.mounted) return;
-    await _save(context, {'playCount': value});
-  }
-
-  Future<void> _pickInterval(BuildContext context, AppSettings settings) async {
-    final value = await showOptionsSheet<int>(
-      context: context,
-      title: '重复间隔',
-      selected: settings.repeatIntervalMs,
-      options: const [
-        OptionChoice(0, '不等待'),
-        OptionChoice(500, '0.5 秒'),
-        OptionChoice(1000, '1 秒'),
-        OptionChoice(2000, '2 秒'),
-        OptionChoice(3000, '3 秒'),
-      ],
-    );
-    if (value == null || !context.mounted) return;
-    await _save(context, {'repeatIntervalMs': value});
-  }
-
-  Future<void> _pickTrigger(BuildContext context, AppSettings settings) async {
-    final value = await showOptionsSheet<String>(
-      context: context,
-      title: '触发方式',
-      selected: settings.triggerMode,
-      options: const [
-        OptionChoice('direct', '直接播放'),
-        OptionChoice('open_app', '打开应用后播放'),
-      ],
-    );
-    if (value == null || !context.mounted) return;
-    await _save(context, {'triggerMode': value});
-  }
-
-  Future<void> _pickAppIcon(
-    BuildContext context,
-    AppSettings settings,
-  ) async {
+  Future<void> _pickAppIcon(BuildContext context, AppSettings settings) async {
     final value = await showAppSheet<String>(
       context: context,
       title: '应用图标',
@@ -129,7 +56,10 @@ class SettingsPage extends StatelessWidget {
                   ? scheme.primary.withValues(alpha: 0.06)
                   : Colors.transparent,
               child: InkWell(
-                onTap: () => Navigator.of(sheetContext).pop(choice.$1),
+                onTap: () {
+                  AppHaptics.tap();
+                  Navigator.of(sheetContext).pop(choice.$1);
+                },
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(minHeight: 64),
                   child: Padding(
@@ -209,17 +139,23 @@ class SettingsPage extends StatelessWidget {
     }
   }
 
-  Future<void> _pinShortcut(BuildContext context) async {
+  Future<void> _pinShortcut(BuildContext context, GlobalKey anchorKey) async {
     final model = AppScope.read(context);
     if (model.audios.isEmpty) {
       onOpenAudioTab();
       return;
     }
-    final id = await showAudioPickerSheet(
+    final id = await showAppPopupMenu<String>(
       context: context,
-      audios: model.audios,
-      selectedId: model.defaultAudio?.id,
-      title: '选择音频',
+      anchorKey: anchorKey,
+      entries: [
+        for (final audio in model.audios)
+          AppMenuEntry(
+            value: audio.id,
+            label: audio.title,
+            checked: model.defaultAudio?.id == audio.id,
+          ),
+      ],
     );
     if (id == null || !context.mounted) return;
     final audio = model.audioById(id);
@@ -242,7 +178,7 @@ class SettingsPage extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (_) => LicensePage(
           applicationName: 'SoundOut',
-          applicationVersion: '0.2.3:01-BS10',
+          applicationVersion: '0.3.0:01-BS16',
           applicationLegalese: 'ByRUDAN',
         ),
       ),
@@ -255,6 +191,7 @@ class SettingsPage extends StatelessWidget {
     final settings = model.settings;
     const topPadding = 16.0;
     final defaultAudio = model.defaultAudio;
+    final shortcutKey = GlobalKey();
 
     return SafeArea(
       bottom: false,
@@ -271,13 +208,26 @@ class SettingsPage extends StatelessWidget {
             child: SettingsSection(
               title: '音频',
               children: [
-                SettingsRow(
-                  icon: Icons.library_music_outlined,
-                  title: '默认音频',
-                  value: defaultAudio?.title ?? '未选择',
-                  showChevron: true,
-                  onTap: () => _pickDefaultAudio(context),
-                ),
+                if (model.audios.isEmpty)
+                  SettingsRow(
+                    icon: Icons.library_music_outlined,
+                    title: '默认音频',
+                    value: '未选择',
+                    showChevron: true,
+                    onTap: onOpenAudioTab,
+                  )
+                else
+                  SettingsMenuRow<String>(
+                    icon: Icons.library_music_outlined,
+                    title: '默认音频',
+                    value: defaultAudio?.title ?? '未选择',
+                    selected: settings.defaultAudioId ?? '',
+                    options: [
+                      for (final audio in model.audios) (audio.id, audio.title),
+                    ],
+                    onChanged: (value) =>
+                        _save(context, {'defaultAudioId': value}),
+                  ),
                 _VolumeTile(
                   value: settings.volume,
                   onChangedEnd: (value) => _save(context, {'volume': value}),
@@ -296,17 +246,35 @@ class SettingsPage extends StatelessWidget {
             child: SettingsSection(
               title: '播放次数',
               children: [
-                SettingsRow(
+                SettingsMenuRow<int>(
                   icon: Icons.repeat_rounded,
                   title: '重复次数',
                   value: settings.playCountLabel,
-                  onTap: () => _pickPlayCount(context, settings),
+                  selected: settings.playCount,
+                  options: const [
+                    (1, '1 次'),
+                    (2, '2 次'),
+                    (3, '3 次'),
+                    (5, '5 次'),
+                    (10, '10 次'),
+                    (0, '循环播放'),
+                  ],
+                  onChanged: (value) => _save(context, {'playCount': value}),
                 ),
-                SettingsRow(
+                SettingsMenuRow<int>(
                   icon: Icons.timer_outlined,
                   title: '重复间隔',
                   value: settings.repeatIntervalLabel,
-                  onTap: () => _pickInterval(context, settings),
+                  selected: settings.repeatIntervalMs,
+                  options: const [
+                    (0, '不等待'),
+                    (500, '0.5 秒'),
+                    (1000, '1 秒'),
+                    (2000, '2 秒'),
+                    (3000, '3 秒'),
+                  ],
+                  onChanged: (value) =>
+                      _save(context, {'repeatIntervalMs': value}),
                 ),
               ],
             ),
@@ -315,17 +283,20 @@ class SettingsPage extends StatelessWidget {
             child: SettingsSection(
               title: '触发方式',
               children: [
-                SettingsRow(
+                SettingsMenuRow<String>(
                   icon: Icons.touch_app_outlined,
                   title: '点按后',
                   value: settings.triggerModeLabel,
-                  onTap: () => _pickTrigger(context, settings),
+                  selected: settings.triggerMode,
+                  options: const [('direct', '直接播放'), ('open_app', '打开应用后播放')],
+                  onChanged: (value) => _save(context, {'triggerMode': value}),
                 ),
                 SettingsRow(
+                  key: shortcutKey,
                   icon: Icons.bolt_outlined,
                   title: '应用快捷方式',
                   value: '添加',
-                  onTap: () => _pinShortcut(context),
+                  onTap: () => _pinShortcut(context, shortcutKey),
                 ),
                 SettingsRow(
                   icon: Icons.widgets_outlined,
@@ -347,6 +318,46 @@ class SettingsPage extends StatelessWidget {
                   showChevron: true,
                   onTap: () => _pickAppIcon(context, settings),
                 ),
+                SettingsSwitchRow(
+                  icon: Icons.blur_on_rounded,
+                  title: '液态玻璃',
+                  subtitle: '卡片与浮层使用模糊透光玻璃质感',
+                  value: settings.glassEffect,
+                  onChanged: (value) => _save(context, {'glassEffect': value}),
+                ),
+                if (settings.glassEffect)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                    child: Row(
+                      children: [
+                        Text(
+                          '玻璃强度',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: SegmentedControl<double>(
+                            value: settings.glassStrength,
+                            segments: const [
+                              (0.0, '弱'),
+                              (0.5, '中'),
+                              (1.0, '强'),
+                            ],
+                            onChanged: (value) =>
+                                _save(context, {'glassStrength': value}),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                SettingsSwitchRow(
+                  icon: Icons.vibration_rounded,
+                  title: '点击震动',
+                  subtitle: '按下按钮时给出轻微触感反馈',
+                  value: settings.hapticsEnabled,
+                  onChanged: (value) =>
+                      _save(context, {'hapticsEnabled': value}),
+                ),
               ],
             ),
           ),
@@ -357,7 +368,7 @@ class SettingsPage extends StatelessWidget {
                 SettingsRow(
                   icon: Icons.info_outline_rounded,
                   title: '关于 SoundOut',
-                  value: '0.2.3:01-BS10',
+                  value: '0.3.0:01-BS16',
                   showChevron: true,
                   onTap: () => _openAbout(context),
                 ),
@@ -414,6 +425,25 @@ class _VolumeTile extends StatefulWidget {
 class _VolumeTileState extends State<_VolumeTile> {
   late double _value = widget.value;
   bool _dragging = false;
+  late int _hapticStep;
+
+  @override
+  void initState() {
+    super.initState();
+    _hapticStep = (widget.value * 20).round();
+  }
+
+  void _handleChanged(double value) {
+    final step = (value * 20).round();
+    if (step != _hapticStep) {
+      _hapticStep = step;
+      AppHaptics.select();
+    }
+    setState(() {
+      _dragging = true;
+      _value = value;
+    });
+  }
 
   @override
   void didUpdateWidget(covariant _VolumeTile oldWidget) {
@@ -455,12 +485,7 @@ class _VolumeTileState extends State<_VolumeTile> {
           ),
           Slider(
             value: _value.clamp(0, 1).toDouble(),
-            onChanged: (value) {
-              setState(() {
-                _dragging = true;
-                _value = value;
-              });
-            },
+            onChanged: _handleChanged,
             onChangeEnd: (value) {
               setState(() => _dragging = false);
               widget.onChangedEnd(value);

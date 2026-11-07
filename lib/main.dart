@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'src/app_model.dart';
+import 'src/glass.dart';
+import 'src/haptics.dart';
 import 'src/pages/home_shell.dart';
 import 'src/pages/onboarding_page.dart';
 import 'src/theme.dart';
@@ -16,36 +18,79 @@ Future<void> main() async {
   runApp(SoundOutApp(model: model));
 }
 
-class SoundOutApp extends StatelessWidget {
+class SoundOutApp extends StatefulWidget {
   const SoundOutApp({super.key, required this.model});
 
   final AppModel model;
 
   @override
+  State<SoundOutApp> createState() => _SoundOutAppState();
+}
+
+class _SoundOutAppState extends State<SoundOutApp> {
+  late final ValueNotifier<({bool enabled, double strength})> _glass;
+
+  @override
+  void initState() {
+    super.initState();
+    _glass = ValueNotifier(_snapshot());
+    widget.model.addListener(_syncGlass);
+  }
+
+  ({bool enabled, double strength}) _snapshot() {
+    final settings = widget.model.settings;
+    return (enabled: settings.glassEffect, strength: settings.glassStrength);
+  }
+
+  void _syncGlass() {
+    final next = _snapshot();
+    final current = _glass.value;
+    if (next.enabled != current.enabled || next.strength != current.strength) {
+      _glass.value = next;
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.model.removeListener(_syncGlass);
+    _glass.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AppScope(
-      model: model,
-      child: MaterialApp(
-        title: 'SoundOut',
-        debugShowCheckedModeBanner: false,
-        theme: buildAppTheme(Brightness.light),
-        darkTheme: buildAppTheme(Brightness.dark),
-        themeMode: ThemeMode.system,
-        locale: const Locale('zh', 'CN'),
-        supportedLocales: const [Locale('zh', 'CN'), Locale('en')],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        builder: (context, child) {
-          final brightness = Theme.of(context).brightness;
-          return AnnotatedRegion<SystemUiOverlayStyle>(
-            value: systemOverlayStyleFor(brightness),
-            child: child ?? const SizedBox.shrink(),
+      model: widget.model,
+      child: ValueListenableBuilder<({bool enabled, double strength})>(
+        valueListenable: _glass,
+        builder: (context, glass, _) {
+          return MaterialApp(
+            title: 'SoundOut',
+            debugShowCheckedModeBanner: false,
+            theme: buildAppTheme(Brightness.light, glass: glass.enabled),
+            darkTheme: buildAppTheme(Brightness.dark, glass: glass.enabled),
+            themeMode: ThemeMode.system,
+            locale: const Locale('zh', 'CN'),
+            supportedLocales: const [Locale('zh', 'CN'), Locale('en')],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            builder: (context, child) {
+              final brightness = Theme.of(context).brightness;
+              return AnnotatedRegion<SystemUiOverlayStyle>(
+                value: systemOverlayStyleFor(brightness),
+                child: GlassScope(
+                  enabled: glass.enabled,
+                  strength: glass.strength,
+                  child: AppBackdrop(child: child ?? const SizedBox.shrink()),
+                ),
+              );
+            },
+            home: const _RootGate(),
           );
         },
-        home: const _RootGate(),
       ),
     );
   }
@@ -132,7 +177,13 @@ class _ErrorScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                FilledButton(onPressed: onRetry, child: const Text('重试')),
+                FilledButton(
+                  onPressed: () {
+                    AppHaptics.tap();
+                    onRetry();
+                  },
+                  child: const Text('重试'),
+                ),
               ],
             ),
           ),

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 
+import 'haptics.dart';
 import 'models.dart';
 import 'native_bridge.dart';
 
@@ -131,6 +132,10 @@ class AppModel extends ChangeNotifier {
     await _bridge.stop();
   }
 
+  Future<void> seekPlayback(int positionMs) async {
+    await _bridge.seekPlayback(positionMs);
+  }
+
   Future<Map<String, dynamic>> requestPinWidget() => _bridge.requestPinWidget();
 
   Future<Map<String, dynamic>> desktopCapabilities() =>
@@ -153,6 +158,7 @@ class AppModel extends ChangeNotifier {
     }
     if (state['settings'] is Map) {
       _settings = AppSettings.fromMap(state['settings'] as Map);
+      AppHaptics.enabled = _settings.hapticsEnabled;
     }
     if (state['playback'] is Map) {
       _playback = PlaybackSnapshot.fromMap(state['playback'] as Map);

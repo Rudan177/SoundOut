@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../glass.dart';
+import '../haptics.dart';
 import '../update_service.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/settings_widgets.dart';
@@ -22,7 +24,7 @@ class _AboutPageState extends State<AboutPage> {
       MaterialPageRoute<void>(
         builder: (_) => LicensePage(
           applicationName: 'SoundOut',
-          applicationVersion: '0.2.3:01-BS10',
+          applicationVersion: '0.3.0:01-BS16',
           applicationLegalese: 'ByRUDAN',
           applicationIcon: const AppIcon(size: 48, radius: 13),
         ),
@@ -113,7 +115,7 @@ class _AboutPageState extends State<AboutPage> {
                       vertical: 5,
                     ),
                     child: Text(
-                      '0.2.3:01-BS10',
+                      '0.3.0:01-BS16',
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: scheme.onPrimaryContainer,
                         fontWeight: FontWeight.w600,
@@ -132,7 +134,12 @@ class _AboutPageState extends State<AboutPage> {
                 ),
                 const SizedBox(height: 20),
                 FilledButton.tonalIcon(
-                  onPressed: _checking ? null : _checkUpdate,
+                  onPressed: _checking
+                      ? null
+                      : () {
+                          AppHaptics.tap();
+                          _checkUpdate();
+                        },
                   icon: _checking
                       ? const SizedBox(
                           width: 16,
@@ -166,7 +173,7 @@ class _AboutPageState extends State<AboutPage> {
               const SettingsRow(
                 icon: Icons.tag_rounded,
                 title: '版本',
-                value: '0.2.3:01-BS10',
+                value: '0.3.0:01-BS16',
               ),
               SettingsRow(
                 icon: Icons.description_outlined,
@@ -225,14 +232,18 @@ class _UpdateStatusCard extends StatelessWidget {
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-      child: Material(
-        color: scheme.brightness == Brightness.dark
+      child: GlassPanel(
+        radius: 20,
+        opaqueColor: scheme.brightness == Brightness.dark
             ? scheme.surfaceContainerLow
             : scheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(20),
-        clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: ready ? onInstall : null,
+          onTap: ready
+              ? () {
+                  AppHaptics.tap();
+                  onInstall();
+                }
+              : null,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(

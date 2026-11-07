@@ -76,6 +76,9 @@ data class AppSettings(
     val appIcon: String = APP_ICON_ORIGINAL,
     val onboardingDone: Boolean = false,
     val shortcutPromptShown: Boolean = false,
+    val glassEffect: Boolean = false,
+    val glassStrength: Float = 0.5f,
+    val hapticsEnabled: Boolean = false,
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("defaultAudioId", defaultAudioId ?: JSONObject.NULL)
@@ -87,6 +90,9 @@ data class AppSettings(
         put("appIcon", appIcon)
         put("onboardingDone", onboardingDone)
         put("shortcutPromptShown", shortcutPromptShown)
+        put("glassEffect", glassEffect)
+        put("glassStrength", glassStrength)
+        put("hapticsEnabled", hapticsEnabled)
     }
 
     fun toMap(): Map<String, Any?> = mapOf(
@@ -99,6 +105,9 @@ data class AppSettings(
         "appIcon" to appIcon,
         "onboardingDone" to onboardingDone,
         "shortcutPromptShown" to shortcutPromptShown,
+        "glassEffect" to glassEffect,
+        "glassStrength" to glassStrength.toDouble(),
+        "hapticsEnabled" to hapticsEnabled,
     )
 
     companion object {
@@ -118,6 +127,9 @@ data class AppSettings(
                 ?: APP_ICON_ORIGINAL,
             onboardingDone = json.optBoolean("onboardingDone", false),
             shortcutPromptShown = json.optBoolean("shortcutPromptShown", false),
+            glassEffect = json.optBoolean("glassEffect", false),
+            glassStrength = json.optDouble("glassStrength", 0.5).toFloat().coerceIn(0f, 1f),
+            hapticsEnabled = json.optBoolean("hapticsEnabled", false),
         )
     }
 }

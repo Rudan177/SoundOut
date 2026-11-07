@@ -6,8 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 
+import '../glass.dart';
+import '../haptics.dart';
 import 'dock_spring.dart';
 
 const double _barHeight = 62;
@@ -181,12 +182,12 @@ class _DockSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        color: _floatingSurface(colorScheme),
-        shape: _fullShape,
-        shadows: dockShadows(colorScheme),
-      ),
+    return GlassSurface(
+      shape: _fullShape,
+      fallbackColor: _floatingSurface(colorScheme),
+      tint: _floatingSurface(colorScheme),
+      shadows: dockShadows(colorScheme),
+      sigmaBoost: 6,
       child: child,
     );
   }
@@ -727,7 +728,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
       if (!mounted || _pressedIndex != index || _dragging || !handler(index)) {
         return;
       }
-      HapticFeedback.mediumImpact();
+      AppHaptics.strong();
       _longPressed = true;
     });
   }
@@ -755,7 +756,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     _lens.springTo(position, _followSpring);
     final index = _indexAt(position);
     if (index != _pressedIndex) {
-      HapticFeedback.selectionClick();
+      AppHaptics.select();
       _pressedIndex = index;
     }
   }
@@ -780,7 +781,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
         .clamp(pressed - 1, pressed + 1)
         .clamp(0, _lastIndex);
     if (index != pressed) {
-      HapticFeedback.selectionClick();
+      AppHaptics.select();
       _pressedIndex = index;
     }
   }
@@ -797,7 +798,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     // 没拖动过的抬手就是对该目的地的点击；重复点击也要再报一次，
     // 上层据此决定是回到页首还是忽略。长按已经震动过了，不再补一次。
     final tapped = !_dragging && !longPressed;
-    if (tapped) HapticFeedback.lightImpact();
+    if (tapped) AppHaptics.tap();
     _pressedIndex = null;
     _dragging = false;
     _dropping = true;

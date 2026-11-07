@@ -26,7 +26,7 @@ android {
         // You can force using the value of versionCode by specifying the `-P force-version-code-ignoring-abi=true`
         // flag during build.
         versionCode = flutter.versionCode
-        versionName = "0.2.3:01-BS10"
+        versionName = "0.3.0:01-BS16"
     }
 
     buildTypes {
