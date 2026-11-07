@@ -205,6 +205,8 @@ sha256sum *.apk > SHA256SUMS.txt
 
 当前 release 使用 debug 签名，仅用于本地安装测试；正式发布必须替换为正式签名。
 
+`dist/`、`build/` 等构建产物不提交到仓库，仅作为 GitHub Release 资产上传。
+
 ## 8. 验收清单
 
 每次交付前至少验证：

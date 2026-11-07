@@ -47,5 +47,5 @@ app.*.map.json
 # Widget Preview related
 .widget_preview/
 
-# Release APKs are uploaded to GitHub Releases, not committed
-/dist/*.apk
+# Release artifacts are uploaded to GitHub Releases, not committed
+/dist/

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show ValueNotifier;
 import 'package:flutter/services.dart' show rootBundle;
 
 import 'native_bridge.dart';
@@ -88,6 +89,32 @@ class UpdateCheckResult {
   final UpdateInfo? update;
 }
 
+sealed class UpdateDownloadState {
+  const UpdateDownloadState({required this.versionName});
+
+  final String versionName;
+}
+
+final class UpdateDownloading extends UpdateDownloadState {
+  const UpdateDownloading({
+    required super.versionName,
+    this.received = 0,
+    this.total = 0,
+  });
+
+  final int received;
+  final int total;
+}
+
+final class UpdateReady extends UpdateDownloadState {
+  const UpdateReady({required super.versionName, required this.path});
+
+  final String path;
+}
+
+final ValueNotifier<UpdateDownloadState?> updateDownloadState =
+    ValueNotifier<UpdateDownloadState?>(null);
+
 class UpdateService {
   UpdateService({NativeBridge? bridge}) : _bridge = bridge ?? NativeBridge();
 
@@ -148,7 +175,7 @@ class UpdateService {
 
   Future<String> downloadApk(
     UpdateInfo info, {
-    void Function(double? progress)? onProgress,
+    void Function(int received, int total)? onProgress,
   }) async {
     final url = info.apkUrl;
     if (url == null || url.isEmpty) {
@@ -189,7 +216,7 @@ class UpdateService {
         await for (final chunk in response) {
           sink.add(chunk);
           received += chunk.length;
-          onProgress?.call(total > 0 ? received / total : null);
+          onProgress?.call(received, total);
         }
         await sink.flush();
       } finally {
@@ -208,6 +235,49 @@ class UpdateService {
 
   Future<Map<String, dynamic>> installApk(String path) async {
     return _bridge.installApk(path);
+  }
+
+  Future<void> downloadUpdate(UpdateInfo info) async {
+    updateDownloadState.value = UpdateDownloading(
+      versionName: info.version.versionName,
+    );
+    var shown = 0;
+    try {
+      final path = await downloadApk(
+        info,
+        onProgress: (received, total) {
+          final step = total > 0 ? total ~/ 100 : 1 << 20;
+          if (received - shown < step && received != total) return;
+          shown = received;
+          updateDownloadState.value = UpdateDownloading(
+            versionName: info.version.versionName,
+            received: received,
+            total: total,
+          );
+        },
+      );
+      updateDownloadState.value = UpdateReady(
+        versionName: info.version.versionName,
+        path: path,
+      );
+    } catch (_) {
+      updateDownloadState.value = null;
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> installDownloaded() async {
+    final state = updateDownloadState.value;
+    if (state is! UpdateReady) {
+      return const {'status': 'failed', 'message': '没有可安装的更新'};
+    }
+    final result = await _bridge.installApk(state.path);
+    if (result['status'] == 'opened') {
+      updateDownloadState.value = null;
+    } else {
+      result['path'] = state.path;
+    }
+    return result;
   }
 
   Future<bool> openUrl(String url) => _bridge.openUrl(url);

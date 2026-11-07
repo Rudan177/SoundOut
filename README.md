@@ -37,7 +37,7 @@ SoundOut 是一个 Flutter + 原生 Android 的轻量音频快捷播放器，界
 4. 点按小组件的齿轮，选择该小组件要播放的音频并保存。
 5. 点按小组件或快捷方式即可播放。通知栏、应用内迷你播放器都可以停止。
 6. 若桌面没有出现添加提示，使用应用内的「没提示？」查看手动添加方法。
-7. 在「设置 → 关于 → 检查更新」中可从 GitHub 获取最新版本并下载安装。
+7. 在关于页点「检查更新」，可读取 GitHub 上的版本信息并从 Releases 下载安装最新版本。
 
 > Android 13 及以上首次在应用内播放时会请求通知权限。拒绝后音频仍可播放，但通知栏停止按钮不会显示。
 
@@ -85,17 +85,25 @@ flutter build apk --release --split-per-abi
 本项目的 release 构建默认沿用 debug 签名，仅用于本地测试。正式发布前请在
 `android/app/build.gradle.kts` 中配置自己的签名。
 
-## 已构建产物
+## 下载与更新
 
-`dist/` 中提供了可直接安装的 APK，选择其中一个安装即可：
+- 最新版本发布页：[github.com/Rudan177/SoundOut/releases/latest](https://github.com/Rudan177/SoundOut/releases/latest)
+- 全部 Releases：[github.com/Rudan177/SoundOut/releases](https://github.com/Rudan177/SoundOut/releases)
+- 版本信息：[assets/version.json](./assets/version.json)
+
+应用内「关于 → 检查更新」会读取仓库中的 `assets/version.json`，与本机版本比对；发现新版本后，从 GitHub Releases 下载与设备 ABI 匹配的 APK，并唤起系统安装器。
+
+## 发布产物
+
+构建产物输出到本地 `dist/`，不提交到仓库，统一上传到 GitHub Releases：
 
 | 文件 | 适用设备 | 大小 |
 | --- | --- | --- |
-| `SoundOut-0.2.2-01-BS08-arm64-v8a.apk` | 大多数现代 Android 手机（推荐） | 约 20 MB |
-| `SoundOut-0.2.2-01-BS08-armeabi-v7a.apk` | 较旧的 32 位设备 | 约 17 MB |
-| `SoundOut-0.2.2-01-BS08-universal.apk` | 所有 ABI，含模拟器 | 约 52 MB |
+| `SoundOut-0.2.2-01-BS08-arm64-v8a.apk` | 大多数现代 Android 手机（推荐） | 约 19 MB |
+| `SoundOut-0.2.2-01-BS08-armeabi-v7a.apk` | 较旧的 32 位设备 | 约 16 MB |
+| `SoundOut-0.2.2-01-BS08-universal.apk` | 所有 ABI，含模拟器 | 约 50 MB |
 
-校验值在 `dist/SHA256SUMS.txt`。
+下载入口就是上方的 Releases 页面，校验值随 Release 一并提供（`SHA256SUMS.txt`）。
 
 ## 说明
 

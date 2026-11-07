@@ -7,7 +7,6 @@ import '../widgets/app_sheet.dart';
 import '../widgets/option_sheet.dart';
 import '../widgets/page_heading.dart';
 import '../widgets/settings_widgets.dart';
-import '../widgets/update_dialog.dart';
 import '../widgets/desktop_entry_sheet.dart';
 import '../widgets/ui_helpers.dart';
 import 'about_page.dart';
@@ -361,13 +360,6 @@ class SettingsPage extends StatelessWidget {
                   value: '0.2.2:01-BS08',
                   showChevron: true,
                   onTap: () => _openAbout(context),
-                ),
-                SettingsRow(
-                  icon: Icons.system_update_alt_rounded,
-                  title: '检查更新',
-                  subtitle: '从 GitHub 获取最新版本',
-                  showChevron: true,
-                  onTap: () => checkForUpdate(context),
                 ),
                 SettingsRow(
                   icon: Icons.description_outlined,
