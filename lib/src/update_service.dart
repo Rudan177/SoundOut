@@ -51,7 +51,8 @@ class VersionInfo {
       versionName: versionName,
       versionCode: (json['versionCode'] as num?)?.toInt() ?? 0,
       repository: _string(json['repository']),
-      changelog: (json['changelog'] as List?)
+      changelog:
+          (json['changelog'] as List?)
               ?.whereType<String>()
               .map((item) => item.trim())
               .where((item) => item.isNotEmpty)
@@ -140,7 +141,7 @@ class UpdateService {
 
   Future<UpdateCheckResult> checkForUpdate() async {
     final local = await readLocalVersion();
-    final remoteJson = await _fetchJson(_remoteVersionUrl);
+    final remoteJson = await _fetchJson(_remoteVersionRequestUrl());
     if (remoteJson is! Map) {
       throw const UpdateException('版本信息格式不正确');
     }
@@ -186,9 +187,7 @@ class UpdateService {
     final dir = Directory(dirPath);
     await dir.create(recursive: true);
     final name = _safeFileName(
-      info.apkName.isNotEmpty
-          ? info.apkName
-          : Uri.parse(url).pathSegments.last,
+      info.apkName.isNotEmpty ? info.apkName : Uri.parse(url).pathSegments.last,
     );
     final file = File('${dir.path}${Platform.pathSeparator}$name');
     if (file.existsSync()) file.deleteSync();
@@ -344,8 +343,7 @@ class UpdateService {
     final apks = assets
         .where(
           (asset) =>
-              asset.name.toLowerCase().endsWith('.apk') &&
-              asset.url.isNotEmpty,
+              asset.name.toLowerCase().endsWith('.apk') && asset.url.isNotEmpty,
         )
         .toList(growable: false);
     if (apks.isEmpty) return null;
@@ -378,6 +376,12 @@ class ReleaseAsset {
   final String name;
   final String url;
   final int? size;
+}
+
+String _remoteVersionRequestUrl() {
+  // GitHub raw 的 CDN 会缓存约 5 分钟，加时间戳避免读到旧版本。
+  final separator = _remoteVersionUrl.contains('?') ? '&' : '?';
+  return '$_remoteVersionUrl${separator}t=${DateTime.now().millisecondsSinceEpoch}';
 }
 
 String _string(Object? value) => value is String ? value.trim() : '';
