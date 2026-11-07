@@ -22,7 +22,7 @@ class _AboutPageState extends State<AboutPage> {
       MaterialPageRoute<void>(
         builder: (_) => LicensePage(
           applicationName: 'SoundOut',
-          applicationVersion: '0.2.2:01-BS08',
+          applicationVersion: '0.2.2:01-BS09',
           applicationLegalese: 'ByRUDAN',
           applicationIcon: const AppIcon(size: 48, radius: 13),
         ),
@@ -113,7 +113,7 @@ class _AboutPageState extends State<AboutPage> {
                       vertical: 5,
                     ),
                     child: Text(
-                      '0.2.2:01-BS08',
+                      '0.2.2:01-BS09',
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: scheme.onPrimaryContainer,
                         fontWeight: FontWeight.w600,
@@ -166,7 +166,7 @@ class _AboutPageState extends State<AboutPage> {
               const SettingsRow(
                 icon: Icons.tag_rounded,
                 title: '版本',
-                value: '0.2.2:01-BS08',
+                value: '0.2.2:01-BS09',
               ),
               SettingsRow(
                 icon: Icons.description_outlined,

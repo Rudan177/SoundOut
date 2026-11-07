@@ -242,7 +242,7 @@ class SettingsPage extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (_) => LicensePage(
           applicationName: 'SoundOut',
-          applicationVersion: '0.2.2:01-BS08',
+          applicationVersion: '0.2.2:01-BS09',
           applicationLegalese: 'ByRUDAN',
         ),
       ),
@@ -357,7 +357,7 @@ class SettingsPage extends StatelessWidget {
                 SettingsRow(
                   icon: Icons.info_outline_rounded,
                   title: '关于 SoundOut',
-                  value: '0.2.2:01-BS08',
+                  value: '0.2.2:01-BS09',
                   showChevron: true,
                   onTap: () => _openAbout(context),
                 ),

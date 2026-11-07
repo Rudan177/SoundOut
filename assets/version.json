@@ -1,8 +1,8 @@
 {
   "app": "SoundOut",
   "version": "0.2.2",
-  "build": "01-BS08",
-  "versionName": "0.2.2:01-BS08",
+  "build": "01-BS09",
+  "versionName": "0.2.2:01-BS09",
   "versionCode": 8,
   "minAndroidSdk": 24,
   "releaseDate": "2026-11-07",
